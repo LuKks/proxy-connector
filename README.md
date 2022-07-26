@@ -39,7 +39,9 @@ console.log(res.data)
 ## Fetch
 ```javascript
 const HttpsProxyAgent = require('https-proxy-agent')
-const res = await fetch('https://checkip.amazonaws.com', { agent: new HttpsProxyAgent(proxy.toUpstream()) })
+
+const agent = new HttpsProxyAgent(proxy.toUpstream())
+const res = await fetch('https://checkip.amazonaws.com', { agent })
 console.log(await res.text())
 ```
 
