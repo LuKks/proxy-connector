@@ -3,6 +3,7 @@ const ProxyConnector = require('./')
 const net = require('net')
 const axios = require('axios')
 const fetch = require('like-fetch')
+const HttpsProxyAgent = require('https-proxy-agent')
 
 if (!process.env.PROXY_PROTOCOL || !process.env.PROXY_HOST || !process.env.PROXY_PORT || !process.env.PROXY_USERNAME || !process.env.PROXY_PASSWORD) {
   console.error('You have to pass all the ENV variables like this:')
@@ -47,8 +48,8 @@ tape('toUpstream', async function (t) {
 
   await proxy.ready()
 
-  // const res = await fetch('https://checkip.amazonaws.com', { agent: new HttpsProxyAgent(proxy.toUpstream()) })
-  const res = await fetch('https://checkip.amazonaws.com', { proxy: proxy.toUpstream() })
+  const agent = new HttpsProxyAgent(proxy.toUpstream())
+  const res = await fetch('https://checkip.amazonaws.com', { agent })
   const ip = (await res.text()).trim()
   t.is(ip, proxy.address)
 })
@@ -83,24 +84,28 @@ tape('country, also fetch', async function (t) {
   const checker = 'https://get.geojs.io/v1/ip/geo.json'
 
   proxy.country = 'ar'
-  const res1 = await fetch(checker, { proxy: proxy.toUpstream(), retry: { max: 3 }, timeout: 10000 })
+  const res1 = await fetch(checker, { agent: HPA(proxy), retry: { max: 3 }, timeout: 10000 })
   const body1 = await res1.json()
   t.is(body1.country_code, 'AR')
 
   proxy.country = 'us'
-  const res2 = await fetch(checker, { proxy: proxy.toUpstream(), retry: { max: 3 }, timeout: 10000 })
+  const res2 = await fetch(checker, { agent: HPA(proxy), retry: { max: 3 }, timeout: 10000 })
   const body2 = await res2.json()
   t.is(body2.country_code, 'US')
 
   proxy.country = 'au'
-  const res3 = await fetch(checker, { proxy: proxy.toUpstream(), retry: { max: 3 }, timeout: 10000 })
+  const res3 = await fetch(checker, { agent: HPA(proxy), retry: { max: 3 }, timeout: 10000 })
   const body3 = await res3.json()
   t.is(body3.country_code, 'AU')
 
   proxy.country = 'mx'
-  const res4 = await fetch(checker, { proxy: proxy.toUpstream(), retry: { max: 3 }, timeout: 10000 })
+  const res4 = await fetch(checker, { agent: HPA(proxy), retry: { max: 3 }, timeout: 10000 })
   const body4 = await res4.json()
   t.is(body4.country_code, 'MX')
+
+  function HPA (proxy) {
+    return new HttpsProxyAgent(proxy.toUpstream())
+  }
 })
 
 tape('same session', async function (t) {

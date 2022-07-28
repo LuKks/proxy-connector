@@ -1,6 +1,7 @@
 const fetch = require('like-fetch')
 const crypto = require('crypto')
 const net = require('net')
+const HttpsProxyAgent = require('https-proxy-agent')
 
 module.exports = class ProxyConnector {
   constructor ({ protocol, host, port, username, password, country, city, session }) {
@@ -43,7 +44,8 @@ module.exports = class ProxyConnector {
   }
 
   async ready () {
-    this.address = await this._getRemoteAddress(this.checker, { proxy: this.toUpstream() })
+    const agent = new HttpsProxyAgent(this.toUpstream())
+    this.address = await this._getRemoteAddress(this.checker, { agent })
   }
 
   async _getRemoteAddress (url, opts = {}) {

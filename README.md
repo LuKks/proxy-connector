@@ -1,6 +1,6 @@
 # proxy-connector
 
-Proxy wrapper that ensures connectivity and supports fetch and axios for Node.js.
+Proxy wrapper that ensures connectivity and supports fetch, axios, etc.
 
 ![](https://img.shields.io/npm/v/proxy-connector.svg) ![](https://img.shields.io/npm/dt/proxy-connector.svg) ![](https://img.shields.io/badge/tested_with-tape-e683ff.svg) ![](https://img.shields.io/github/license/LuKks/proxy-connector.svg)
 
