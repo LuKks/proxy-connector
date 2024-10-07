@@ -4,7 +4,7 @@ const net = require('net')
 const HttpsProxyAgent = require('https-proxy-agent')
 
 module.exports = class ProxyConnector {
-  constructor ({ protocol, host, port, username, password, country, city, session }) {
+  constructor ({ protocol, host, port, username, password, country, city, session, streaming }) {
     this.protocol = protocol || 'http'
     this.host = host
     this.port = port
@@ -14,6 +14,7 @@ module.exports = class ProxyConnector {
     this.country = country
     this.city = city
     this.session = session === undefined ? Math.random().toString() : session
+    this.streaming = !!streaming
 
     this.checker = 'https://checkip.amazonaws.com'
     this.originAddress = ''
@@ -28,7 +29,9 @@ module.exports = class ProxyConnector {
     const country = this.country ? ('_country-' + this.country) : ''
     const city = this.city ? ('_country-' + this.city) : ''
     const session = this.session ? ('_session-' + this.sessionId + '_lifetime-24h') : ''
-    return this.password + country + city + session
+    const streaming = this.streaming ? ('_streaming-1') : ''
+
+    return this.password + country + city + session + streaming
   }
 
   toUpstream () {
