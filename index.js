@@ -1,70 +1,75 @@
-const fetch = require('like-fetch')
 const crypto = require('crypto')
-const net = require('net')
-const HttpsProxyAgent = require('https-proxy-agent')
+const connectivityCheck = require('connectivity-check')
 
 module.exports = class ProxyConnector {
-  constructor ({ protocol, host, port, username, password, country, city, session, streaming }) {
-    this.protocol = protocol || 'http'
-    this.host = host
-    this.port = port
-    this.username = username
-    this.password = password
+  constructor (opts = {}) {
+    this.protocol = opts.protocol || process.env.PROXY_PROTOCOL || 'http'
+    this.host = opts.host || process.env.PROXY_HOST
+    this.port = opts.port || process.env.PROXY_PORT
+    this.username = opts.username || process.env.PROXY_USERNAME
+    this._password = opts.password || process.env.PROXY_PASSWORD
 
-    this.country = country
-    this.city = city
-    this.session = session === undefined ? Math.random().toString() : session
-    this.streaming = !!streaming
+    this.country = opts.country || null
+    this.city = opts.city || null
+    this.session = opts.session || randomId()
+    this.streaming = !!opts.streaming
 
-    this.checker = 'https://checkip.amazonaws.com'
-    this.originAddress = ''
-    this.address = ''
+    this.originAddress = null
+    this.address = null
   }
 
   get sessionId () {
+    // TODO: Remove old obfuscation on next version
     return 'sid' + crypto.createHash('md5').update(this.session).digest('hex')
   }
 
-  _password () {
+  get url () {
+    return this.protocol + '://' + this.host + ':' + this.port
+  }
+
+  get password () {
     const country = this.country ? ('_country-' + this.country) : ''
     const city = this.city ? ('_country-' + this.city) : ''
-    const session = this.session ? ('_session-' + this.sessionId + '_lifetime-24h') : ''
+    const session = this.session ? ('_session-' + this.sessionId + '_lifetime-168h') : ''
     const streaming = this.streaming ? ('_streaming-1') : ''
 
-    return this.password + country + city + session + streaming
+    return this._password + country + city + session + streaming
+  }
+
+  set password (value) {
+    this._password = value
   }
 
   toUpstream () {
-    return this.protocol + '://' + this.username + ':' + this._password() + '@' + this.host + ':' + this.port
+    return this.protocol + '://' + this.username + ':' + this.password + '@' + this.host + ':' + this.port
   }
 
   toObject () {
-    return { protocol: this.protocol, host: this.host, port: this.port, auth: { username: this.username, password: this._password() } }
+    return { protocol: this.protocol, host: this.host, port: this.port, auth: { username: this.username, password: this.password } }
   }
 
+  randomize () {
+    this.session = randomId()
+  }
+
+  async check (local) {
+    if (local) {
+      this.originAddress = await connectivityCheck()
+    } else {
+      this.address = await connectivityCheck({ proxy: this.toUpstream() })
+    }
+  }
+
+  // Keeping those for backwards compatibility
   async localReady () {
-    this.originAddress = await this._getRemoteAddress(this.checker)
+    await this.check(true)
   }
 
   async ready () {
-    const agent = new HttpsProxyAgent(this.toUpstream())
-    this.address = await this._getRemoteAddress(this.checker, { agent })
+    await this.check()
   }
+}
 
-  async _getRemoteAddress (url, opts = {}) {
-    const body = await fetch(url, {
-      timeout: 10000,
-      retry: { max: 3 },
-      validateStatus: 200,
-      responseType: 'text',
-      ...opts
-    })
-
-    const address = body.trim()
-    if (net.isIP(address) === 0) {
-      throw new Error('INVALID')
-    }
-
-    return address
-  }
+function randomId () {
+  return Math.random().toString().slice(2)
 }

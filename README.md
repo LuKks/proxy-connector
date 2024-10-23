@@ -1,15 +1,14 @@
 # proxy-connector
 
-Proxy wrapper that ensures connectivity and supports fetch, axios, etc.
-
-![](https://img.shields.io/npm/v/proxy-connector.svg) ![](https://img.shields.io/npm/dt/proxy-connector.svg) ![](https://img.shields.io/badge/tested_with-tape-e683ff.svg) ![](https://img.shields.io/github/license/LuKks/proxy-connector.svg)
+Proxy wrapper that ensures connectivity and supports fetch and axios
 
 ```
 npm i proxy-connector
 ```
 
 ## Usage
-```javascript
+
+```js
 const ProxyConnector = require('proxy-connector')
 
 const proxy = new ProxyConnector({
@@ -21,29 +20,84 @@ const proxy = new ProxyConnector({
   session: Math.random().toString()
 })
 
-// Optional: ensure home/server connectivity
-await proxy.localReady()
-console.log(proxy.originAddress)
+await proxy.check()
 
-// Optional: ensure proxy connectivity
-await proxy.ready()
 console.log(proxy.address)
 ```
 
-## Axios
-```javascript
+Axios:
+
+```js
 const res = await axios.get('https://checkip.amazonaws.com', { proxy: proxy.toObject() })
+
 console.log(res.data)
 ```
 
-## Fetch
-```javascript
-const HttpsProxyAgent = require('https-proxy-agent')
+Fetch:
+
+```js
+const { HttpsProxyAgent } = require('https-proxy-agent')
 
 const agent = new HttpsProxyAgent(proxy.toUpstream())
 const res = await fetch('https://checkip.amazonaws.com', { agent })
+
 console.log(await res.text())
 ```
 
+## API
+
+#### `proxy = new ProxyConnector(options)`
+
+Create a new instance.
+
+Options:
+
+```js
+{
+  protocol, // Defaults to process.env.PROXY_PROTOCOL or 'http'
+  host, // Defaults to process.env.PROXY_HOST
+  port, // Defaults to process.env.PROXY_PORT
+  username, // Defaults to process.env.PROXY_USERNAME
+  password, // Defaults to process.env.PROXY_PASSWORD
+  country, // E.g. 'ar' (depends on your provider)
+  city,
+  session, // Defaults to a random fixed session
+  streaming: false
+}
+```
+
+#### `proxy.url`
+
+Returns a constructed URL based on the protocol, host, and port.
+
+#### `proxy.password`
+
+Returns a constructed password based on the country, city, and session.
+
+#### `upstream = proxy.toUpstream()`
+
+Returns the full proxy URL with username and password included.
+
+Example: `http://user:pass@host.com:3128`
+
+#### `upstream = proxy.toObject()`
+
+Returns the proxy settings with username and password included.
+
+Example: `{ protocol, host, port, auth: { username, password } }`.
+
+#### `proxy.randomize()`
+
+Changes the session to a new random one.
+
+#### `await proxy.check()`
+
+Ensures that the proxy works. It can be called multiple times.
+
+It also saves the proxy IP in `proxy.address`.
+
+It uses `connectivity-check` internally.
+
 ## License
+
 MIT

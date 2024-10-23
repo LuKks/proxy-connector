@@ -1,16 +1,14 @@
 {
   "name": "proxy-connector",
   "version": "0.2.0",
-  "description": "Proxy wrapper that ensures connectivity and supports fetch and axios for Node.js",
+  "description": "Proxy wrapper that ensures connectivity and supports fetch and axios",
   "main": "index.js",
   "scripts": {
-    "test": "standard && tape test.js",
-    "tape": "tape test.js",
-    "lint": "standard"
+    "test": "standard && brittle test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/LuKks/proxy-connector.git"
+    "url": "git+https://github.com/LuKks/proxy-connector.git"
   },
   "author": "Lucas Barrena (@LuKks)",
   "license": "MIT",
@@ -19,12 +17,14 @@
   },
   "homepage": "https://github.com/LuKks/proxy-connector",
   "dependencies": {
-    "https-proxy-agent": "^5.0.1",
-    "like-fetch": "^1.0.3"
+    "connectivity-check": "^1.0.0"
   },
   "devDependencies": {
     "axios": "^0.27.2",
-    "standard": "^17.0.0",
-    "tape": "^5.5.3"
+    "brittle": "^3.7.0",
+    "dotenv": "^16.4.5",
+    "https-proxy-agent": "^7.0.5",
+    "like-fetch": "^2.3.0",
+    "standard": "^17.1.2"
   }
 }
