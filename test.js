@@ -25,7 +25,10 @@ test('basic', async function (t) {
     host: process.env.PROXY_HOST,
     port: process.env.PROXY_PORT,
     username: process.env.PROXY_USERNAME,
-    password: process.env.PROXY_PASSWORD
+    password: process.env.PROXY_PASSWORD,
+    // Higher or better pool of proxies
+    country: 'us',
+    streaming: true
   })
 
   t.is(proxy.originAddress, null)
@@ -40,7 +43,7 @@ test('basic', async function (t) {
 })
 
 test('inherit env', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
   const upstream = proxy.toObject()
 
   t.ok(upstream.protocol)
@@ -59,7 +62,7 @@ test('inherit env', async function (t) {
 })
 
 test('toUpstream', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
 
   await proxy.check()
 
@@ -71,7 +74,7 @@ test('toUpstream', async function (t) {
 })
 
 test('toObject', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
 
   await proxy.check()
 
@@ -82,7 +85,7 @@ test('toObject', async function (t) {
 })
 
 test('country', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
 
   const GEO_URL = 'https://get.geojs.io/v1/ip/geo.json'
 
@@ -102,17 +105,17 @@ test('country', async function (t) {
 })
 
 test('same session', async function (t) {
-  const a = new ProxyConnector()
+  const a = new ProxyConnector({ country: 'us', streaming: true })
   await a.check()
 
-  const b = new ProxyConnector({ session: a.session })
+  const b = new ProxyConnector({ session: a.session, country: 'us', streaming: true })
   await b.check()
 
   t.is(a.address, b.address)
 })
 
 test('change session', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
 
   await proxy.check()
   const address1 = proxy.address
@@ -126,7 +129,7 @@ test('change session', async function (t) {
 })
 
 test('randomize', async function (t) {
-  const proxy = new ProxyConnector()
+  const proxy = new ProxyConnector({ country: 'us', streaming: true })
 
   await proxy.check()
   const address1 = proxy.address

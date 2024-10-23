@@ -96,7 +96,7 @@ Ensures that the proxy works. It can be called multiple times.
 
 It also saves the proxy IP in `proxy.address`.
 
-It uses `connectivity-check` internally.
+It uses [connectivity-check](https://github.com/lukks/connectivity-check) internally.
 
 ## License
 
