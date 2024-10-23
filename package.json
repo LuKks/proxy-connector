@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "Proxy wrapper that ensures connectivity and supports fetch and axios",
   "main": "index.js",
+  "files": [],
   "scripts": {
     "test": "standard && brittle test.js"
   },
