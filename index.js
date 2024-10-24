@@ -9,6 +9,10 @@ module.exports = class ProxyConnector {
     this.username = opts.username || process.env.PROXY_USERNAME || null
     this._password = opts.password || process.env.PROXY_PASSWORD || null
 
+    if (!this.host || !this.port) {
+      throw new Error('Proxy host or port is missing')
+    }
+
     this.country = opts.country || null
     this.city = opts.city || null
     this.session = opts.session || randomId()
