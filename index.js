@@ -6,8 +6,8 @@ module.exports = class ProxyConnector {
     this.protocol = opts.protocol || process.env.PROXY_PROTOCOL || 'http'
     this.host = opts.host || process.env.PROXY_HOST
     this.port = opts.port || process.env.PROXY_PORT
-    this.username = opts.username || process.env.PROXY_USERNAME
-    this._password = opts.password || process.env.PROXY_PASSWORD
+    this.username = opts.username || process.env.PROXY_USERNAME || null
+    this._password = opts.password || process.env.PROXY_PASSWORD || null
 
     this.country = opts.country || null
     this.city = opts.city || null
@@ -41,11 +41,15 @@ module.exports = class ProxyConnector {
   }
 
   toUpstream () {
-    return this.protocol + '://' + this.username + ':' + this.password + '@' + this.host + ':' + this.port
+    const auth = this.username ? (this.username + ':' + this.password + '@') : ''
+
+    return this.protocol + '://' + auth + this.host + ':' + this.port
   }
 
   toObject () {
-    return { protocol: this.protocol, host: this.host, port: this.port, auth: { username: this.username, password: this.password } }
+    const auth = this.username ? { username: this.username, password: this.password } : null
+
+    return { protocol: this.protocol, host: this.host, port: this.port, auth }
   }
 
   randomize () {
