@@ -1,6 +1,6 @@
 {
   "name": "proxy-connector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Proxy wrapper that ensures connectivity and supports fetch and axios",
   "main": "index.js",
   "files": [],
