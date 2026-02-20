@@ -39,10 +39,12 @@ module.exports = class ProxyConnector {
     }
 
     if (this.provider === 2) {
-      const country = this.country ? ('__cr.' + this.country) : ''
+      const country = this.country ? ('cr.' + this.country) : ''
       const session = this.session ? ('sessid.' + this.sessionId + ';sessttl.10080') : ''
 
-      return this._username + country + session
+      const params = [country, session].filter(Boolean)
+
+      return this._username + (params.length > 0 ? '__' + params.join(';') : '')
     }
 
     throw new Error('Provider not supported: ' + this.provider)
