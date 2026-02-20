@@ -6,7 +6,7 @@ module.exports = class ProxyConnector {
     this.protocol = opts.protocol || process.env.PROXY_PROTOCOL || 'http'
     this.host = opts.host || process.env.PROXY_HOST
     this.port = opts.port || process.env.PROXY_PORT
-    this.username = opts.username || process.env.PROXY_USERNAME || null
+    this._username = opts.username || process.env.PROXY_USERNAME || null
     this._password = opts.password || process.env.PROXY_PASSWORD || null
 
     if (!this.host || !this.port) {
@@ -20,6 +20,8 @@ module.exports = class ProxyConnector {
 
     this.originAddress = null
     this.address = null
+
+    this.provider = opts.provider || null
   }
 
   get sessionId () {
@@ -31,13 +33,40 @@ module.exports = class ProxyConnector {
     return this.protocol + '://' + this.host + ':' + this.port
   }
 
-  get password () {
-    const country = this.country ? ('_country-' + this.country) : ''
-    const city = this.city ? ('_country-' + this.city) : ''
-    const session = this.session ? ('_session-' + this.sessionId + '_lifetime-168h') : ''
-    const streaming = this.streaming ? ('_streaming-1') : ''
+  get username () {
+    if (!this.provider || this.provider === 1) {
+      return this._username
+    }
 
-    return this._password + country + city + session + streaming
+    if (this.provider === 2) {
+      const country = this.country ? ('__cr.' + this.country) : ''
+      const session = this.session ? ('sessid.' + this.sessionId + ';sessttl.10080') : ''
+
+      return this._username + country + session
+    }
+
+    throw new Error('Provider not supported: ' + this.provider)
+  }
+
+  set username (value) {
+    this._username = value
+  }
+
+  get password () {
+    if (!this.provider || this.provider === 1) {
+      const country = this.country ? ('_country-' + this.country) : ''
+      const city = this.city ? ('_country-' + this.city) : ''
+      const session = this.session ? ('_session-' + this.sessionId + '_lifetime-168h') : ''
+      const streaming = this.streaming ? ('_streaming-1') : ''
+
+      return this._password + country + city + session + streaming
+    }
+
+    if (this.provider === 2) {
+      return this._password
+    }
+
+    throw new Error('Provider not supported: ' + this.provider)
   }
 
   set password (value) {
